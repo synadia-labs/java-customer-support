@@ -38,6 +38,7 @@ gradlew test
 
 Run individual tests
 ```
+gradlew test --tests SslTests.testConnectFailsFromSslContext
 gradlew test --tests SslTests.testConnectFailsAfterInitialConnect
 gradlew test --tests SslTests.testConnectFailsCertAlreadyExpired
 gradlew test --tests SslTests.testReconnectFailsAfterCertExpires
@@ -53,6 +54,7 @@ mvn test
 
 Run individual tests
 ```
+mvn -Dtest=SslTests#testConnectFailsFromSslContext test
 mvn -Dtest=SslTests#testConnectFailsAfterInitialConnect test
 mvn -Dtest=SslTests#testConnectFailsCertAlreadyExpired test
 mvn -Dtest=SslTests#testReconnectFailsAfterCertExpires test

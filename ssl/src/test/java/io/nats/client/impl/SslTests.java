@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import java.net.SocketException;
 import java.nio.file.Files;
@@ -39,15 +40,14 @@ public class SslTests {
     static boolean SHOW_SERVER = false;
 
     static {
+        System.out.println("JNats Version: " + Nats.CLIENT_VERSION);
         String env = System.getenv("SSLTESTS.SHOW.SERVER");
         if (env != null && env.equalsIgnoreCase("true")) {
             SHOW_SERVER = true;
         }
-        //noinspection ConstantValue
         if (SHOW_SERVER) {
             NatsTestServer.verbose();
         }
-        System.out.println("JNats Version: " + Nats.CLIENT_VERSION);
     }
 
     static TestInfo CURRENT_INFO;
@@ -55,6 +55,40 @@ public class SslTests {
     @BeforeEach
     public void beforeEach(TestInfo testInfo) {
         CURRENT_INFO = testInfo;
+    }
+
+    @Test
+    public void testConnectFailsFromSslContext() throws Exception {
+        SSLContext sslContext = SslTestingHelper.getFailContext();
+
+        CountDownLatch exceptionLatch = new CountDownLatch(1);
+        ErrorListener el = new ErrorListener() {
+            @Override
+            public void exceptionOccurred(Connection conn, Exception exp) {
+                if (hasSslOrSocketCauseInChain(exp)) {
+                    exceptionLatch.countDown();
+                }
+            }
+        };
+
+        try (NatsTestServer ts = new NatsTestServer("src/test/resources/tls.conf", SHOW_SERVER)) {
+            Options options = new Options.Builder()
+                .server(ts.getNatsLocalhostUri())
+                .sslContext(sslContext)
+                .maxReconnects(1)
+                .connectionTimeout(Duration.ofSeconds(2))
+                .errorListener(el)
+                .build();
+
+            try (Connection nc = Nats.connect(options)) {
+                fail("Should not have connected");
+            }
+            catch (Exception e) {
+                assertTrue(e.getMessage().contains("Unable to connect to NATS servers"));
+            }
+
+            assertTrue(exceptionLatch.await(2, TimeUnit.SECONDS));
+        }
     }
 
     @Test
