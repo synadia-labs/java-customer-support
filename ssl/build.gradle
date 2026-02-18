@@ -12,8 +12,9 @@ if (jnatsv == null || jnatsv.equals("")) {
         jnatsv = "2.20.0"
     }
 }
+System.out.println("JNATS_VERSION: " + jnatsv)
 
-version = "1.0.2"
+version = "1.0.3"
 group = 'synadia'
 
 java {
@@ -37,6 +38,10 @@ dependencies {
     testImplementation 'io.nats:jnats-server-runner:3.0.1'
 
     testImplementation 'org.junit.platform:junit-platform-launcher:1.14.3'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.warnings = false
 }
 
 test {

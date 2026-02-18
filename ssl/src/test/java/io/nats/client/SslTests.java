@@ -16,6 +16,7 @@ package io.nats.client;
 import io.nats.client.ssl.ExpiringClientCertUtil;
 import io.nats.client.ssl.SslTestingHelper;
 import io.nats.client.utils.NatsTestServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -27,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -38,8 +40,6 @@ public class SslTests {
     static boolean SHOW_SERVER = false;
 
     static {
-        System.out.println("JNats Version: " + Nats.CLIENT_VERSION);
-        System.out.println();
         String env = System.getenv("SSLTESTS.SHOW.SERVER");
         if (env != null && env.equalsIgnoreCase("true")) {
             SHOW_SERVER = true;
@@ -49,11 +49,18 @@ public class SslTests {
         }
     }
 
-    static TestInfo CURRENT_INFO;
+    static String TEST_ID;
 
     @BeforeEach
     public void beforeEach(TestInfo testInfo) {
-        CURRENT_INFO = testInfo;
+        TEST_ID = testInfo.getDisplayName().replace("()", "");
+        System.out.println();
+        report("START TEST");
+    }
+
+    @AfterEach
+    public void afterEach() {
+        report("END TEST");
     }
 
     @Test
@@ -85,6 +92,7 @@ public class SslTests {
     @Test
     public void testConnectFailsCertAlreadyExpired() throws Exception {
         ExpiringClientCertUtil.Result result = ExpiringClientCertUtil.createExpired();
+        validateExpiry(result, true);
 
         Path tmpDir = Files.createTempDirectory(null).toAbsolutePath();
         String configFilePath = result.writeNatsConfig(tmpDir);
@@ -113,8 +121,8 @@ public class SslTests {
 
     @Test
     public void testReconnectFailsAfterCertExpires() throws Exception {
-        ExpiringClientCertUtil.Result result =
-            ExpiringClientCertUtil.create(3000);
+        ExpiringClientCertUtil.Result result = ExpiringClientCertUtil.create(5000);
+        validateExpiry(result, false);
 
         Path tmpDir = Files.createTempDirectory(null).toAbsolutePath();
         String configFilePath = result.writeNatsConfig(tmpDir);
@@ -138,7 +146,8 @@ public class SslTests {
                 nc = Nats.connect(options);
                 assertEquals(Connection.Status.CONNECTED, nc.getStatus());
                 assertTrue(cl.latch.await(2, TimeUnit.SECONDS));
-                sleep(3500); // sleep enough time for the cert to expire
+                sleep(5000); // sleep enough time for the cert to expire
+                validateExpiry(result, true);
             }
             assertTrue(el.latch.await(2, TimeUnit.SECONDS));
             nc.close();
@@ -151,8 +160,8 @@ public class SslTests {
 
     @Test
     public void testForceReconnectFailsAfterCertExpires() throws Exception {
-        ExpiringClientCertUtil.Result result =
-            ExpiringClientCertUtil.create(3000);
+        ExpiringClientCertUtil.Result result = ExpiringClientCertUtil.create(5000);
+        validateExpiry(result, false);
 
         Path tmpDir = Files.createTempDirectory(null).toAbsolutePath();
         String configFilePath = result.writeNatsConfig(tmpDir);
@@ -173,7 +182,8 @@ public class SslTests {
             try (Connection nc = Nats.connect(options)) {
                 assertEquals(Connection.Status.CONNECTED, nc.getStatus());
                 assertTrue(cl.latch.await(2, TimeUnit.SECONDS));
-                sleep(3500); // sleep enough time for the cert to expire
+                sleep(5000); // sleep enough time for the cert to expire
+                validateExpiry(result, true);
                 nc.forceReconnect();
                 assertTrue(el.latch.await(2, TimeUnit.SECONDS));
             }
@@ -181,6 +191,23 @@ public class SslTests {
 
         assertEquals(1, cl.count);
         assertEquals(2, el.exceptions.size());
+    }
+
+    private void validateExpiry(ExpiringClientCertUtil.Result result, boolean expired) {
+        Date expiry = result.sslContext.getClientCertificateExpiry();
+        Date now = new Date();
+        report("Certificate Expiry: " + expiry);
+        report("Current Time      : " + now);
+        if (expired) {
+            assertTrue(expiry.before(now));
+        }
+        else {
+            assertFalse(expiry.before(now));
+        }
+    }
+
+    private void report(String s) {
+        System.out.println("TEST: [" + TEST_ID + "] " + s);
     }
 
     static class SslTestConnectionListener implements ConnectionListener {
@@ -201,7 +228,7 @@ public class SslTests {
         }
     }
 
-    static class SslTestErrorListener implements ErrorListener {
+    class SslTestErrorListener implements ErrorListener {
         public List<Exception> exceptions;
         public CountDownLatch latch;
 
@@ -212,10 +239,7 @@ public class SslTests {
 
         @Override
         public void exceptionOccurred(Connection conn, Exception exp) {
-            System.out.println("TEST: ["
-                + CURRENT_INFO.getDisplayName().replace("()", "")
-                + "] exceptionOccurred: \""
-                + exp + "\"");
+            report("exceptionOccurred: \"" + exp + "\"");
             if (hasSslOrSocketCauseInChain(exp)) {
                 exceptions.add(exp);
                 if (latch.getCount() > 0) {
