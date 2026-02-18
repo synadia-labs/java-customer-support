@@ -29,7 +29,7 @@ you can set `SHOW_SERVER` variable manually in the [SslTests.java](src/test/java
 ### Command Line
 
 #### Gradle
-> Note: Pre-requisites: Gradle 8.14 or later
+> Note: Gradle 8.14 or later is required.
 
 Run all tests:
 ```
