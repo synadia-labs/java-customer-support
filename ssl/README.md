@@ -4,6 +4,8 @@ Testing SSL Error Raising
 
 ### Setting the JNATS Java Client Version
 
+Set the version as needed:
+
 #### Gradle
 
 `build.gradle` 
@@ -32,6 +34,8 @@ testImplementation "io.nats:jnats:2.20.0"
 Run from the ssl directory.
 
 If you want full server output, add the `SSLTESTS.SHOW.SERVER` environment variable like so:
+
+You can also set the `SHOW_SERVER` variable manually in the [SslTests.java](src/test/java/io/nats/client/impl/SslTests.java) class
 
 **Unix**
 ```
