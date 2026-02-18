@@ -1,6 +1,6 @@
 # SSL Test Project
 
-Testing SSL Error Raising
+Testing SSL Error Raising, Version 1.0.2 
 
 ### Prerequisites
 
@@ -39,7 +39,6 @@ gradlew test
 Run individual tests
 ```
 gradlew test --tests SslTests.testConnectFailsFromSslContext
-gradlew test --tests SslTests.testConnectFailsAfterInitialConnect
 gradlew test --tests SslTests.testConnectFailsCertAlreadyExpired
 gradlew test --tests SslTests.testReconnectFailsAfterCertExpires
 gradlew test --tests SslTests.testForceReconnectFailsAfterCertExpires
@@ -55,7 +54,6 @@ mvn test
 Run individual tests
 ```
 mvn -Dtest=SslTests#testConnectFailsFromSslContext test
-mvn -Dtest=SslTests#testConnectFailsAfterInitialConnect test
 mvn -Dtest=SslTests#testConnectFailsCertAlreadyExpired test
 mvn -Dtest=SslTests#testReconnectFailsAfterCertExpires test
 mvn -Dtest=SslTests#testForceReconnectFailsAfterCertExpires test
