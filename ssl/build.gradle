@@ -2,12 +2,23 @@ plugins {
     id 'java-library'
 }
 
+def jnatsv = System.getenv("JNATS_VERSION")
+if (jnatsv == null || jnatsv.equals("")) {
+    try {
+        jnatsv = jnatsVersion
+    }
+    catch (Exception ignore) {}
+    if (jnatsv == null || jnatsv.equals("")) {
+        jnatsv = "2.20.0"
+    }
+}
+
 version = "1.0.0"
 group = 'synadia'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -18,21 +29,20 @@ repositories {
 }
 
 dependencies {
-    testImplementation "io.nats:jnats:2.20.0"
+    implementation "io.nats:jnats:${jnatsv}"
 
     testImplementation 'org.bouncycastle:bcprov-lts8on:2.73.10'
     testImplementation 'org.jspecify:jspecify:1.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.14.1'
     testImplementation 'io.nats:jnats-server-runner:3.0.1'
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.14.3'
 }
 
 test {
     useJUnitPlatform() // For JUnit 5
     testLogging {
-        showStandardStreams = true // Print stdout/stderr
-//        events = ["PASSED", "SKIPPED", "FAILED"] // Optional: Control event logging
+        showStandardStreams = true
     }
 }
 

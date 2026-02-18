@@ -39,7 +39,6 @@ public class SslTests {
     static boolean SHOW_SERVER = false;
 
     static {
-
         String env = System.getenv("SSLTESTS.SHOW.SERVER");
         if (env != null && env.equalsIgnoreCase("true")) {
             SHOW_SERVER = true;
@@ -48,6 +47,7 @@ public class SslTests {
         if (SHOW_SERVER) {
             NatsTestServer.verbose();
         }
+        System.out.println("JNats Version: " + Nats.CLIENT_VERSION);
     }
 
     static TestInfo CURRENT_INFO;

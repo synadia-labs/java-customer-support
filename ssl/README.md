@@ -2,60 +2,59 @@
 
 Testing SSL Error Raising
 
-### Setting the JNATS Java Client Version
+### Prerequisites
 
-Set the version as needed:
+* Java 11, 17 or 21
+* Run from the ssl directory in this project.
 
-#### Gradle
+### Environment
 
-`build.gradle` 
+1\. The JNATS Java Client Version is set in the `build.gradle` and `pom.xml` as `2.20.0`
+You can manually change the `build.gradle` or `pom.xml` to change this or set an environment variable, see below.
+During the test run, the JNats Version will be printed.
 
-```
-testImplementation "io.nats:jnats:2.20.0"
-```
+2\. If you want full server output,
+you can set `SHOW_SERVER` variable manually in the [SslTests.java](src/test/java/io/nats/client/impl/SslTests.java) class
 
-#### Maven
+**The environment variables...**
 
-`pom.xml`
-```xml
-<dependency>
-    <groupId>io.nats</groupId>
-    <artifactId>jnats</artifactId>
-    <version>2.20.0</version>
-    <scope>test</scope>
-</dependency>
-```
+| OS      | JNats Version                            | Show Server Setting                |
+|---------|------------------------------------------|------------------------------------|
+| Unix    | `export JNATS_VERSION=major.minor.patch` | `export SSLTESTS.SHOW.SERVER=true` |
+| Windows | `set JNATS_VERSION=major.minor.patch`    | `set SSLTESTS.SHOW.SERVER=true`    |
 
 ### Test class: 
 [SslTests.java](src/test/java/io/nats/client/impl/SslTests.java)
 
-### Environment
-
-Run from the ssl directory.
-
-If you want full server output, add the `SSLTESTS.SHOW.SERVER` environment variable like so:
-
-You can also set the `SHOW_SERVER` variable manually in the [SslTests.java](src/test/java/io/nats/client/impl/SslTests.java) class
-
-**Unix**
-```
-export SSLTESTS.SHOW.SERVER=true
-```
-
-**Windows**
-```
-set SSLTESTS.SHOW.SERVER=true
-```
-
 ### Command Line
 
 #### Gradle
-Pre-requisites: Gradle 8.14 or later
+> Note: Pre-requisites: Gradle 8.14 or later
+
+Run all tests:
 ```
-gradlew clean test
+gradlew test
+```
+
+Run individual tests
+```
+gradlew test --tests SslTests.testConnectFailsAfterInitialConnect
+gradlew test --tests SslTests.testConnectFailsCertAlreadyExpired
+gradlew test --tests SslTests.testReconnectFailsAfterCertExpires
+gradlew test --tests SslTests.testForceReconnectFailsAfterCertExpires
 ```
 
 #### Maven
+
+Run all tests:
 ```
-mvn clean test
+mvn test
+```
+
+Run individual tests
+```
+mvn -Dtest=SslTests#testConnectFailsAfterInitialConnect test
+mvn -Dtest=SslTests#testConnectFailsCertAlreadyExpired test
+mvn -Dtest=SslTests#testReconnectFailsAfterCertExpires test
+mvn -Dtest=SslTests#testForceReconnectFailsAfterCertExpires test
 ```
