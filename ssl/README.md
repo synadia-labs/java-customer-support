@@ -1,6 +1,6 @@
 # SSL Test Project
 
-Testing SSL Error Raising, Version 1.0.3 
+Testing SSL Error Raising, Version 1.0.4 
 
 ### Prerequisites
 

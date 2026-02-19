@@ -14,7 +14,7 @@ if (jnatsv == null || jnatsv.equals("")) {
 }
 System.out.println("JNATS_VERSION: " + jnatsv)
 
-version = "1.0.3"
+version = "1.0.4"
 group = 'synadia'
 
 java {
