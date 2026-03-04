@@ -3,7 +3,7 @@ plugins {
 }
 
 version = "1.0.0"
-group = 'synadia'
+group = 'nats'
 
 repositories {
     mavenCentral()
