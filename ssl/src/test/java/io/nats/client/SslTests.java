@@ -126,14 +126,14 @@ public class SslTests {
         }
     }
 
-    static final int CLIENT_CERT_VALIDITY_MILLIS = 5000;
+    static final int EXPIRE_MILLIS = 5000;
 
     @ParameterizedTest
     @ValueSource(strings = {TLSv1dot2, TLSv1dot3})
     public void testReconnectFailsAfterCertExpires(String protocol) throws Exception {
         Path tmpDir = null;
         try {
-            ExpiringComponents expiring = ExpiringClientCertUtil.create(CLIENT_CERT_VALIDITY_MILLIS, protocol);
+            ExpiringComponents expiring = ExpiringClientCertUtil.create(EXPIRE_MILLIS, protocol);
             validateExpiry(expiring, false);
 
             tmpDir = createTempDirectory();
@@ -158,7 +158,7 @@ public class SslTests {
                     nc = Nats.connect(options);
                     assertEquals(Connection.Status.CONNECTED, nc.getStatus());
                     assertTrue(cl.latch.await(2, TimeUnit.SECONDS));
-                    sleep(CLIENT_CERT_VALIDITY_MILLIS); // sleep enough time for the cert to expire
+                    sleep(EXPIRE_MILLIS); // sleep enough time for the cert to expire
                     validateExpiry(expiring, true);
                 }
                 assertTrue(el.latch.await(2, TimeUnit.SECONDS));
@@ -175,7 +175,7 @@ public class SslTests {
     public void testForceReconnectFailsAfterCertExpires(String protocol) throws Exception {
         Path tmpDir = null;
         try {
-            ExpiringComponents expiring = ExpiringClientCertUtil.create(CLIENT_CERT_VALIDITY_MILLIS, protocol);
+            ExpiringComponents expiring = ExpiringClientCertUtil.create(EXPIRE_MILLIS, protocol);
             validateExpiry(expiring, false);
 
             tmpDir = createTempDirectory();
@@ -197,7 +197,7 @@ public class SslTests {
                 try (Connection nc = Nats.connect(options)) {
                     assertEquals(Connection.Status.CONNECTED, nc.getStatus());
                     assertTrue(cl.latch.await(2, TimeUnit.SECONDS));
-                    sleep(CLIENT_CERT_VALIDITY_MILLIS); // sleep enough time for the cert to expire
+                    sleep(EXPIRE_MILLIS); // sleep enough time for the cert to expire
                     validateExpiry(expiring, true);
                     nc.forceReconnect();
                     assertTrue(el.latch.await(2, TimeUnit.SECONDS));
