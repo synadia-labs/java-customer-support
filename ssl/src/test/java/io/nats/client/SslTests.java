@@ -46,7 +46,14 @@ public class SslTests {
 
     @BeforeEach
     public void beforeEach(TestInfo testInfo) {
-        TEST_ID = testInfo.getDisplayName().replace("()", "");
+        String method = testInfo.getTestMethod().isPresent() ? testInfo.getTestMethod().get().getName() : "";
+        String display = testInfo.getDisplayName().replace("()", "").replace("[1] ", "").replace("[2] ", "");
+        if (method.equals(display)) {
+            TEST_ID = method;
+        }
+        else {
+            TEST_ID = method + " " + display;
+        }
         System.out.println();
         report("START TEST");
     }
@@ -216,7 +223,7 @@ public class SslTests {
     }
 
     private void report(String s) {
-        System.out.println("TEST: [" + TEST_ID + "] " + s);
+        System.out.println("[" + TEST_ID + "] " + s);
     }
 
     static class SslTestConnectionListener implements ConnectionListener {
