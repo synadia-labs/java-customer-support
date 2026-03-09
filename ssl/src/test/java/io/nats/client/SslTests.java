@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -22,6 +24,8 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static io.nats.client.ssl.DiagnosticSslContext.TLSv1dot2;
+import static io.nats.client.ssl.DiagnosticSslContext.TLSv1dot3;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SslTests {
@@ -78,11 +82,12 @@ public class SslTests {
         }
     }
 
-    @Test
-    public void testConnectFailsCertAlreadyExpired() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {TLSv1dot2, TLSv1dot3})
+    public void testConnectFailsCertAlreadyExpired(String protocol) throws Exception {
         Path tmpDir = null;
         try {
-            ExpiringComponents expiring = ExpiringClientCertUtil.createExpired();
+            ExpiringComponents expiring = ExpiringClientCertUtil.createExpired(protocol);
             validateExpiry(expiring, true);
 
             tmpDir = createTempDirectory();
@@ -116,11 +121,12 @@ public class SslTests {
 
     static final int CLIENT_CERT_VALIDITY_MILLIS = 5000;
 
-    @Test
-    public void testReconnectFailsAfterCertExpires() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {TLSv1dot2, TLSv1dot3})
+    public void testReconnectFailsAfterCertExpires(String protocol) throws Exception {
         Path tmpDir = null;
         try {
-            ExpiringComponents expiring = ExpiringClientCertUtil.create(CLIENT_CERT_VALIDITY_MILLIS);
+            ExpiringComponents expiring = ExpiringClientCertUtil.create(CLIENT_CERT_VALIDITY_MILLIS, protocol);
             validateExpiry(expiring, false);
 
             tmpDir = createTempDirectory();
@@ -157,11 +163,12 @@ public class SslTests {
         }
     }
 
-    @Test
-    public void testForceReconnectFailsAfterCertExpires() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {TLSv1dot2, TLSv1dot3})
+    public void testForceReconnectFailsAfterCertExpires(String protocol) throws Exception {
         Path tmpDir = null;
         try {
-            ExpiringComponents expiring = ExpiringClientCertUtil.create(CLIENT_CERT_VALIDITY_MILLIS);
+            ExpiringComponents expiring = ExpiringClientCertUtil.create(CLIENT_CERT_VALIDITY_MILLIS, protocol);
             validateExpiry(expiring, false);
 
             tmpDir = createTempDirectory();

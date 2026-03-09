@@ -20,7 +20,7 @@ import java.util.List;
  * <p>
  * Usage:
  * <pre>
- *   DiagnosticSslContext ctx = DiagnosticSslContext.getInstance("TLSv1.2");
+ *   DiagnosticSslContext ctx = DiagnosticSslContext.getInstance(TLSv1dot2);
  *   ctx.init(km, tm, random);
  *
  *   // After SSL operations...
@@ -33,6 +33,9 @@ import java.util.List;
  * </pre>
  */
 public class DiagnosticSslContext extends SSLContext {
+
+    public static final String TLSv1dot2 = "TLSv1.2";
+    public static final String TLSv1dot3 = "TLSv1.3";
 
     private final DiagnosticSpi spi;
 

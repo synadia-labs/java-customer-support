@@ -45,7 +45,7 @@ public class ExpiringClientCertUtil {
      * @param clientCertValidityMillis how long the client cert is valid (from now)
      * @return result with SSLContext and config writer
      */
-    public static ExpiringComponents create(long clientCertValidityMillis) throws Exception {
+    public static ExpiringComponents create(long clientCertValidityMillis, String protocol) throws Exception {
         Date now = new Date();
         Date caExpiry = new Date(now.getTime() + 3_600_000); // CA valid for 1 hour
 
@@ -79,7 +79,7 @@ public class ExpiringClientCertUtil {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, pw);
 
-        DiagnosticSslContext ctx = DiagnosticSslContext.getInstance("TLSv1.2");
+        DiagnosticSslContext ctx = DiagnosticSslContext.getInstance(protocol);
         ctx.init(kmf.getKeyManagers(), trustManagers, new SecureRandom());
 
         return new ExpiringComponents(ctx, clientCert, caCert);
@@ -88,11 +88,7 @@ public class ExpiringClientCertUtil {
     /**
      * Create an ExpiringComponents where the client cert is already expired.
      */
-    public static ExpiringComponents createExpired() throws Exception {
-        return createExpired(false);
-    }
-
-    public static ExpiringComponents createExpired(boolean diagnostic) throws Exception {
+    public static ExpiringComponents createExpired(String protocol) throws Exception {
         Date now = new Date();
         Date caExpiry = new Date(now.getTime() + 3_600_000);
 
@@ -123,7 +119,7 @@ public class ExpiringClientCertUtil {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, pw);
 
-        DiagnosticSslContext ctx = DiagnosticSslContext.getInstance("TLSv1.2");
+        DiagnosticSslContext ctx = DiagnosticSslContext.getInstance(protocol);
         ctx.init(kmf.getKeyManagers(), trustManagers, new SecureRandom());
 
         return new ExpiringComponents(ctx, clientCert, caCert);
